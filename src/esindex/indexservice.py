@@ -34,7 +34,7 @@ class INDEXService(gunicorn.app.base.BaseApplication):
         """The init."""
         self.options = options or {}
         self.application = app
-        super(PROVService, self).__init__()
+        super(INDEXService, self).__init__()
 
     def load_config(self):
         """Load configuration."""
