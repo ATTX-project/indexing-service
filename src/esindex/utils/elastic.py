@@ -1,5 +1,6 @@
 from os import environ
 
-elastic = {'host': environ['SHOST'] if 'SHOST' in environ else "localhost",
-           'port': environ['SPORT'] if 'SPORT' in environ else "9201",
-           'index': environ['SINDEX'] if 'SINDEX' in environ else "data"}
+elastic = {'host': environ['ESHOST'] if 'ESHOST' in environ else "localhost",
+           'port': environ['ESPORT'] if 'ESPORT' in environ else "9210",
+           'bulkport': environ['ESPORTB'] if 'ESPORTB' in environ else "9310",
+           'index': environ['ESINDEX'] if 'ESINDEX' in environ else "data"}
