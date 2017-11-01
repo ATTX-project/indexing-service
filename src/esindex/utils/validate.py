@@ -1,6 +1,7 @@
 import json
 import falcon
 import jsonschema
+from functools import wraps
 
 
 def validate(schema, altschema=None):
@@ -12,6 +13,7 @@ def validate(schema, altschema=None):
     """
     def decorator(func):
         """Decorator function."""
+        @wraps(func)
         def wrapper(self, req, resp, *args, **kwargs):
             """Wrap it nicely."""
             if req.method == 'POST':

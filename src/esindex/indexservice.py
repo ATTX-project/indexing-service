@@ -3,6 +3,8 @@ import multiprocessing
 import gunicorn.app.base
 from esindex.app import init_api
 from gunicorn.six import iteritems
+from esindex.applib.messaging import ScalableRpcServer
+from esindex.utils.broker import broker
 
 
 @click.group()
@@ -25,6 +27,13 @@ def server(host, port, log, workers):
         'errorlog': log
     }
     INDEXService(init_api(), options).run()
+
+
+@cli.command('rpc')
+def rpc():
+    """RPC server."""
+    RPC_SERVER = ScalableRpcServer(broker['host'], broker['user'], broker['pass'], broker['rpcqueue'])
+    RPC_SERVER.start_server()
 
 
 class INDEXService(gunicorn.app.base.BaseApplication):
