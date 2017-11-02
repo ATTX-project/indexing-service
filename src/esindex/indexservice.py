@@ -15,7 +15,7 @@ def cli():
 
 @cli.command('server')
 @click.option('--host', default='127.0.0.1', help='indexservice host.')
-@click.option('--port', default=4034, help='indexservice server port.')
+@click.option('--port', default=4304, help='indexservice server port.')
 @click.option('--workers', default=2, help='indexservice server workers.')
 @click.option('--log', default='logs/server.log', help='log file for app.')
 def server(host, port, log, workers):

@@ -1,6 +1,7 @@
 import json
 import falcon
 from esindex.utils.logs import app_logger
+from esindex.applib.elastic_index import ElasticIndex
 
 
 class IndexClass(object):
@@ -12,3 +13,15 @@ class IndexClass(object):
         resp.content_type = 'application/json'
         resp.status = falcon.HTTP_202
         app_logger.info('Creating/POST data to index.')
+
+
+class AliasesList(object):
+    """List named graphs in the graph store."""
+
+    def on_get(self, req, resp):
+        """Execution of the GET aliases list request."""
+        elastic = ElasticIndex()
+        resp.data = json.dumps(list(elastic._alias_list()), indent=1, sort_keys=True)
+        resp.content_type = 'application/json'
+        resp.status = falcon.HTTP_200
+        app_logger.info('Finished operations on /aliases/list GET Request.')

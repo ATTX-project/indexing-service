@@ -1,12 +1,12 @@
 import json
 import requests
-from graph_manager.utils.logs import app_logger
+from esindex.utils.logs import app_logger
 from datetime import datetime
 from esindex.utils.broker import broker
 from esindex.applib.messaging_publish import Publisher
 from urlparse import urlparse
 from requests_file import FileAdapter
-from esindex.applib.indexing_funct import _index
+from esindex.applib.elastic_index import ElasticIndex
 
 artifact_id = 'GraphManager'  # Define the GraphManager agent
 agent_role = 'storage'  # Define Agent type
@@ -18,10 +18,11 @@ def replace_message(message_data):
     target_alias = message_data["payload"]["indexingServiceInput"]["targetAlias"]
     source_data = message_data["payload"]["indexingServiceInput"]["sourceData"]
     PUBLISHER = Publisher(broker['host'], broker['user'], broker['pass'], broker['provqueue'])
+    elastic = ElasticIndex()
     try:
-        for graph in iter(source_data or []):
-            data = retrieve_data(graph["inputType"], graph["input"])
-            _index(data)
+        for source in iter(source_data or []):
+            data = retrieve_data(source["inputType"], source["input"])
+            elastic._bulk_index(target_alias, data)
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         PUBLISHER.push(prov_message(message_data, "success", startTime, endTime))
         app_logger.info('Replaced graph data in: {0} graph'.format(target_alias))

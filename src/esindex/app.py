@@ -1,6 +1,7 @@
 import falcon
 from esindex.utils.logs import app_logger
 from esindex.api.healthcheck import HealthCheck
+from esindex.api.indexing import AliasesList
 
 api_version = "0.2"  # TO DO: Figure out a better way to do versioning
 
@@ -10,6 +11,8 @@ def init_api():
     indexservice = falcon.API()
 
     indexservice.add_route('/health', HealthCheck())
+
+    indexservice.add_route('/%s/alias/list' % (api_version), AliasesList())
 
     app_logger.info('IndexService REST API is running.')
     return indexservice

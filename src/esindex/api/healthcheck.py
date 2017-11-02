@@ -1,8 +1,7 @@
 import json
 import falcon
 from esindex.utils.logs import app_logger
-from esindex.utils.elastic import elastic
-from elasticsearch import Elasticsearch
+from esindex.applib.elastic_index import ElasticIndex
 
 # TO DO More detailed response from the health endpoint with statistics
 # For now the endpoint responds with a simple 200
@@ -10,13 +9,9 @@ from elasticsearch import Elasticsearch
 
 def healthcheck_response(api_status):
     """Content and format health status response."""
+    elastic = ElasticIndex()
     health_status = dict([('indexService', api_status)])
-    es = Elasticsearch([{'host': elastic['host'], 'port': elastic['port']}])
-    if es.ping():
-        health_status['elasticsearch'] = "Running"
-        # health_status['elasticsearch'] = {"status": es.cluster.health().get('status')}
-    else:
-        health_status['elasticsearch'] = "Not Running"
+    health_status['elasticsearch'] = ''.join(elastic._healthcheck().get("status"))
     return json.dumps(health_status, indent=1, sort_keys=True)
 
 
