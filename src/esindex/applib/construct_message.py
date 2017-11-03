@@ -8,28 +8,33 @@ from urlparse import urlparse
 from requests_file import FileAdapter
 from esindex.applib.elastic_index import ElasticIndex
 
-artifact_id = 'GraphManager'  # Define the GraphManager agent
-agent_role = 'storage'  # Define Agent type
+artifact_id = 'IndexingService'  # Define the IndexingService agent
+agent_role = 'index'  # Define Agent type
 
 
 def replace_message(message_data):
     """Store data in the Graph Store."""
     startTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    target_alias = message_data["payload"]["indexingServiceInput"]["targetAlias"]
+    aliases = message_data["payload"]["indexingServiceInput"]["targetAlias"]
+    alias_list = [str(r) for r in aliases]
+    reference_alias = next(iter(alias_list or []), None)
     source_data = message_data["payload"]["indexingServiceInput"]["sourceData"]
     PUBLISHER = Publisher(broker['host'], broker['user'], broker['pass'], broker['provqueue'])
     elastic = ElasticIndex()
+    create_indexes = []
     try:
         for source in iter(source_data or []):
             data = retrieve_data(source["inputType"], source["input"])
-            elastic._bulk_index(target_alias, data)
+            new_index = elastic._bulk_index(reference_alias, source["docType"], data)
+            elastic._replace_index(new_index, alias_list)
+            create_indexes.append(new_index)
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        PUBLISHER.push(prov_message(message_data, "success", startTime, endTime))
-        app_logger.info('Replaced graph data in: {0} graph'.format(target_alias))
+        PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, create_indexes))
+        app_logger.info('Replaced Indexed data with: {0} aliases'.format(alias_list))
         return json.dumps(response_message(message_data["provenance"], "success"), indent=4, separators=(',', ': '))
     except Exception as error:
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        PUBLISHER.push(prov_message(message_data, "error", startTime, endTime))
+        PUBLISHER.push(prov_message(message_data, "error", startTime, endTime, create_indexes))
         app_logger.error('Something is wrong: {0}'.format(error))
         raise
 
@@ -67,7 +72,7 @@ def retrieve_data(inputType, input_data):
             raise
 
 
-def prov_message(message_data, status, startTime, endTime):
+def prov_message(message_data, status, startTime, endTime, index_list):
     """Construct GM related provenance message."""
     message = dict()
     message["provenance"] = dict()
@@ -88,33 +93,40 @@ def prov_message(message_data, status, startTime, endTime):
 
     prov_message["activity"] = dict()
     prov_message["activity"]["type"] = "ServiceExecution"
-    prov_message["activity"]["title"] = "Graph Manager Operations."
+    prov_message["activity"]["title"] = "Indexing Service Operations."
     prov_message["activity"]["status"] = status
     prov_message["activity"]["startTime"] = startTime
     prov_message["activity"]["endTime"] = endTime
     message["provenance"]["input"] = []
     message["provenance"]["output"] = []
     message["payload"] = {}
-    output_data = {
-        "key": "outputGraph",
-        "role": "Dataset"
-    }
-    source_graphs = message_data["payload"]["graphManagerInput"]["sourceData"]
-
-    for graph in source_graphs:
-        input_data = {
-            "key": "inputGraphs_{0}".format(source_graphs.index(graph)),
-            "role": "tempDataset"
+    for index in index_list:
+        output_data = {
+            "index": index,
+            "key": "outputIndex",
+            "role": "Dataset"
         }
-        key = "inputGraphs_{0}".format(source_graphs.index(graph))
-        if graph["inputType"] == "Data":
+        message["provenance"]["output"].append(output_data)
+
+    alias_list = [str(r) for r in message_data["payload"]["indexingServiceInput"]["targetAlias"]]
+    source_data = message_data["payload"]["indexingServiceInput"]["sourceData"]
+
+    for elem in source_data:
+        key = "index_{0}".format(source_data.index(elem))
+        input_data = {
+            "aliases": alias_list,
+            "key": key,
+            "role": "alias"
+        }
+        if elem["inputType"] == "Data":
             message["payload"][key] = "attx:tempDataset"
-        if graph["inputType"] == "URI":
-            message["payload"][key] = graph["input"]
+        if elem["inputType"] == "URI":
+            message["payload"][key] = elem["input"]
         message["provenance"]["input"].append(input_data)
-    message["payload"]["outputGraph"] = message_data["payload"]["graphManagerInput"]["targetGraph"]
-    message["provenance"]["output"].append(output_data)
-    app_logger.info('Construct provenance metadata for Graph Manager.')
+    message["payload"]["aliases"] = message_data["payload"]["indexingServiceInput"]["targetAlias"]
+
+    app_logger.info('Construct provenance metadata for Indexing Service.')
+    print json.dumps(message)
     return json.dumps(message)
 
 
