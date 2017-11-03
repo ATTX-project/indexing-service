@@ -7,9 +7,43 @@ buildscript {
     }
 }
 
+
+apply plugin: 'maven'
 apply plugin: 'com.linkedin.python-cli'
 
-version = "2.0"
+ext.version_nb = "2.0"
+
+version = "$version_nb"
+
+if (!project.hasProperty("env")) {
+    ext.artifactVersion = "${version_nb}-SNAPSHOT"
+} else if (project.env == "release"){
+    ext.artifactVersion = "${version_nb}"
+}
+
+ext {
+    imageRepo = "attx-dev"
+    artifactRepoPort = "8081"
+    pypiRepoPort = "5039"
+    serviceID = "org.uh.hulib.attx.services"
+}
+
+
+if (!project.hasProperty("artifactRepoURL")) {
+    ext.artifactRepoURL = "http://${imageRepo}:${artifactRepoPort}/repository/attx-releases"
+}
+
+if (!project.hasProperty("pypiURL")) {
+    ext.pypiURL = "http://${imageRepo}:${pypiRepoPort}/"
+}
+
+if (!project.hasProperty("artifactRepoUser")) {
+    ext.artifactRepoUser = ""
+}
+
+if (!project.hasProperty("artifactRepoPassword")) {
+    ext.artifactRepoPassword = ""
+}
 
 python {
     testDir = file('tests')
@@ -32,6 +66,18 @@ dependencies {
     test 'pypi:httpretty:0.8.14'
 }
 
+// Succesfully running the tests requires a logs folder existing.
+task creatFolders {
+    description = "Create logs and data folders."
+    doFirst {
+        mkdir('logs')
+        // mkdir('data')
+    }
+}
+
+buildPex.dependsOn creatFolders
+pytest.dependsOn creatFolders
+
 repositories {
     // using a local repository
     ivy{
@@ -45,10 +91,26 @@ repositories {
     // using a web repository
     ivy{
         name 'pypi-remote'
-        url "http://attx-dev:5039/"
+        url "$pypiURL"
         layout 'pattern' , {
               artifact '[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]'
               ivy '[organisation]/[module]/[revision]/[module]-[revision].ivy'
+        }
+    }
+}
+
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "${artifactRepoURL}") {
+                  authentication(userName: "${artifactRepoUser}", password: "${artifactRepoPassword}")
+            }
+            pom.project {
+                version = "${artifactVersion}"
+                groupId = "${serviceID}"
+                description "Graph Manager Service."
+            }
         }
     }
 }
