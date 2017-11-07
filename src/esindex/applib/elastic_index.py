@@ -40,18 +40,28 @@ class ElasticIndex(object):
             alias_index[key] = [x for x in self.es.indices.get_alias(name=key)]
         return alias_index
 
-    def _index_delete(self, target_index):
-        """Delete an index and remove it aliases."""
-        if self.es.indices.exists(target_index):
-            self.es.indices.delete(index=target_index, ignore=[400, 404])
-
-    def _bulk_index(self, reference_alias, doc_type, data, target_index=None):
-        """Index JSON-LD graph at specific ES endpoint."""
+    def _index_create(self, reference_alias, target_index=None):
+        """Create a new index if it does not exist."""
         try:
             if target_index is not None and not(self.es.indices.exists(target_index)):
                 self.es.indices.create(index=target_index, ignore=400)
             else:
                 target_index = "{0}_service_{1}".format(reference_alias, datetime.now().strftime('%Y%m%d_%H%M%S'))
+            app_logger.info("New index created: \"{0}\".".format(target_index))
+        except Exception as error:
+            app_logger.error('Something is wrong: {0}'.format(error))
+            raise
+        finally:
+            return target_index
+
+    def _index_delete(self, target_index):
+        """Delete an index and remove it aliases."""
+        if self.es.indices.exists(target_index):
+            self.es.indices.delete(index=target_index, ignore=[400, 404])
+
+    def _bulk_index(self, doc_type, data, target_index):
+        """Index one or more documents via the bulk operation."""
+        try:
             if doc_type is None:
                 doc_type = "General"
             self.es.bulk(index=target_index, doc_type=doc_type, body=data)
@@ -59,8 +69,17 @@ class ElasticIndex(object):
         except Exception as error:
             app_logger.error('Something is wrong: {0}'.format(error))
             raise
-        finally:
-            return target_index
+
+    def _api_index(self, doc_id, doc_type, data, target_index):
+        """Index single document from an ."""
+        try:
+            if doc_type is None:
+                doc_type = "General"
+            self.es.index(index=target_index, id=doc_id, doc_type=doc_type, body=data)
+            app_logger.info("Index document {0} in Elasticsearch at index: \"{1}\" with type: \"{2}\".".format(doc_id, target_index, doc_type))
+        except Exception as error:
+            app_logger.error('Something is wrong: {0}'.format(error))
+            raise
 
     def _replace_index(self, new_index, alias_list):
         """Replace an existing index based on an alias."""

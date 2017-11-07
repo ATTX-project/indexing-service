@@ -17,24 +17,32 @@ def replace_message(message_data):
     startTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     aliases = message_data["payload"]["indexingServiceInput"]["targetAlias"]
     alias_list = [str(r) for r in aliases]
+    # If there are multiple aliases in the message we need the first one for reference.
+    # The reference alias will act as a unique identified for the index to be replaced.
     reference_alias = next(iter(alias_list or []), None)
     source_data = message_data["payload"]["indexingServiceInput"]["sourceData"]
     PUBLISHER = Publisher(broker['host'], broker['user'], broker['pass'], broker['provqueue'])
     elastic = ElasticIndex()
-    create_indexes = []
+    # We will be using only one index for all data sources.
+    replace_index = elastic._index_create(reference_alias)
     try:
         for source in iter(source_data or []):
             data = retrieve_data(source["inputType"], source["input"])
-            new_index = elastic._bulk_index(reference_alias, source["docType"], data)
-            elastic._replace_index(new_index, alias_list)
-            create_indexes.append(new_index)
+            if source["useBulk"] and source["useBulk"] is True:
+                elastic._bulk_index(source["docType"], data, replace_index)
+            elif source["documentID"]:
+                elastic._api_index(source["documentID"], source["docType"], data, replace_index)
+            else:
+                raise KeyError("Missing useBulk operation or documentID for single document indexing.")
+        # This is what makes it a replace operation.
+        elastic._replace_index(replace_index, alias_list)
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, create_indexes))
+        PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
         app_logger.info('Replaced Indexed data with: {0} aliases'.format(alias_list))
         return json.dumps(response_message(message_data["provenance"], "success"), indent=4, separators=(',', ': '))
     except Exception as error:
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        PUBLISHER.push(prov_message(message_data, "error", startTime, endTime, create_indexes))
+        PUBLISHER.push(prov_message(message_data, "error", startTime, endTime, replace_index))
         app_logger.error('Something is wrong: {0}'.format(error))
         raise
 
@@ -72,7 +80,7 @@ def retrieve_data(inputType, input_data):
             raise
 
 
-def prov_message(message_data, status, startTime, endTime, index_list):
+def prov_message(message_data, status, startTime, endTime, replace_index):
     """Construct GM related provenance message."""
     message = dict()
     message["provenance"] = dict()
@@ -100,9 +108,17 @@ def prov_message(message_data, status, startTime, endTime, index_list):
     message["provenance"]["input"] = []
     message["provenance"]["output"] = []
     message["payload"] = {}
-    for index in index_list:
+    if type(replace_index) is list:
+        for index in replace_index:
+            output_data = {
+                "index": index,
+                "key": "outputIndex",
+                "role": "Dataset"
+            }
+            message["provenance"]["output"].append(output_data)
+    else:
         output_data = {
-            "index": index,
+            "index": replace_index,
             "key": "outputIndex",
             "role": "Dataset"
         }
@@ -124,6 +140,7 @@ def prov_message(message_data, status, startTime, endTime, index_list):
             message["payload"][key] = elem["input"]
         message["provenance"]["input"].append(input_data)
     message["payload"]["aliases"] = message_data["payload"]["indexingServiceInput"]["targetAlias"]
+    message["payload"]["outputIndex"] = replace_index
 
     app_logger.info('Construct provenance metadata for Indexing Service.')
     print json.dumps(message)
