@@ -5,7 +5,7 @@ import amqpstorm
 from amqpstorm import Message
 from amqpstorm import Connection
 from esindex.utils.logs import app_logger
-from esindex.applib.construct_message import replace_message
+from esindex.applib.construct_message import replace_message, add_message
 
 
 class ScalableRpcServer(object):
@@ -188,10 +188,10 @@ class Consumer(object):
         action = message_data["payload"]["indexingServiceInput"]["activity"]
         if action == "replace":
             return str(replace_message(message_data))
-        # elif action == "refresh":
-        #     return str(query_message(message_data))
-        # elif action == "rollover":
-        #     return str(replace_message(message_data))
+        elif action == "add":
+            return str(add_message(message_data))
+        else:
+            raise KeyError("Missing action or activity not specified.")
 
     def __call__(self, message):
         """Process the RPC Payload.
