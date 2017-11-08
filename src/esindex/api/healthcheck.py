@@ -2,7 +2,8 @@ import json
 import falcon
 from esindex.utils.logs import app_logger
 from esindex.applib.elastic_index import ElasticIndex
-
+from amqpstorm.management import ManagementApi
+from ldframe.utils.broker import broker
 # TO DO More detailed response from the health endpoint with statistics
 # For now the endpoint responds with a simple 200
 
@@ -12,6 +13,13 @@ def healthcheck_response(api_status):
     elastic = ElasticIndex()
     health_status = dict([('indexService', api_status)])
     health_status['elasticsearch'] = ''.join(elastic._healthcheck().get("status"))
+    API = ManagementApi('http://{0}:15672'.format(broker['host']), broker['user'], broker['pass'])
+    try:
+        result = API.aliveness_test('/')
+        if result['status'] == 'ok':
+            health_status['messageBroker'] = "Running"
+    except Exception:
+        health_status['messageBroker'] = "Not Running"
     return json.dumps(health_status, indent=1, sort_keys=True)
 
 

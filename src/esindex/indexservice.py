@@ -37,7 +37,7 @@ def rpc():
 
 
 class INDEXService(gunicorn.app.base.BaseApplication):
-    """Create Standalone Application Provenance Service."""
+    """Create Standalone Application Indexing Service."""
 
     def __init__(self, app, options=None):
         """The init."""
