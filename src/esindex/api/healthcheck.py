@@ -3,7 +3,7 @@ import falcon
 from esindex.utils.logs import app_logger
 from esindex.applib.elastic_index import ElasticIndex
 from amqpstorm.management import ManagementApi
-from ldframe.utils.broker import broker
+from esindex.utils.broker import broker
 # TO DO More detailed response from the health endpoint with statistics
 # For now the endpoint responds with a simple 200
 
