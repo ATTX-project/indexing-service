@@ -55,7 +55,6 @@
               "items": {
                 "type": "object",
                 "required": [
-                  "docType",
                   "inputType",
                   "input"
                 ],
