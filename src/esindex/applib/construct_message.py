@@ -116,7 +116,7 @@ def retrieve_data(inputType, input_data):
 
 
 def prov_message(message_data, status, start_time, end_time, replace_index):
-    """Construct GM related provenance message."""
+    """Construct Indexing related provenance message."""
     message = dict()
     message["provenance"] = dict()
     message["provenance"]["agent"] = dict()
@@ -182,7 +182,7 @@ def prov_message(message_data, status, start_time, end_time, replace_index):
 
 
 def response_message(provenance_data, output):
-    """Construct Graph Manager response."""
+    """Construct Indexing Service response."""
     message = dict()
     message["provenance"] = dict()
     message["provenance"]["agent"] = dict()
