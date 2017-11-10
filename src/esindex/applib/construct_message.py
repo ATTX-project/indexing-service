@@ -115,7 +115,7 @@ def retrieve_data(inputType, input_data):
             raise
 
 
-def prov_message(message_data, status, startTime, endTime, replace_index):
+def prov_message(message_data, status, start_time, end_time, replace_index):
     """Construct GM related provenance message."""
     message = dict()
     message["provenance"] = dict()
@@ -123,14 +123,14 @@ def prov_message(message_data, status, startTime, endTime, replace_index):
     message["provenance"]["agent"]["ID"] = artifact_id
     message["provenance"]["agent"]["role"] = agent_role
 
-    activityID = message_data["provenance"]["context"]["activityID"]
-    workflowID = message_data["provenance"]["context"]["workflowID"]
+    activity_id = message_data["provenance"]["context"]["activityID"]
+    workflow_id = message_data["provenance"]["context"]["workflowID"]
 
     prov_message = message["provenance"]
 
     prov_message["context"] = dict()
-    prov_message["context"]["activityID"] = str(activityID)
-    prov_message["context"]["workflowID"] = str(workflowID)
+    prov_message["context"]["activityID"] = str(activity_id)
+    prov_message["context"]["workflowID"] = str(workflow_id)
     if message_data["provenance"]["context"].get('stepID'):
         prov_message["context"]["stepID"] = message_data["provenance"]["context"]["stepID"]
 
@@ -138,8 +138,8 @@ def prov_message(message_data, status, startTime, endTime, replace_index):
     prov_message["activity"]["type"] = "ServiceExecution"
     prov_message["activity"]["title"] = "Indexing Service Operations."
     prov_message["activity"]["status"] = status
-    prov_message["activity"]["startTime"] = startTime
-    prov_message["activity"]["endTime"] = endTime
+    prov_message["activity"]["startTime"] = start_time
+    prov_message["activity"]["endTime"] = end_time
     message["provenance"]["input"] = []
     message["provenance"]["output"] = []
     message["payload"] = {}
@@ -153,7 +153,7 @@ def prov_message(message_data, status, startTime, endTime, replace_index):
             message["provenance"]["output"].append(output_data)
     else:
         output_data = {
-            "index": replace_index,
+            "index": str(replace_index),
             "key": "outputIndex",
             "role": "Dataset"
         }
@@ -189,14 +189,14 @@ def response_message(provenance_data, output):
     message["provenance"]["agent"]["ID"] = artifact_id
     message["provenance"]["agent"]["role"] = agent_role
 
-    activityID = provenance_data["context"]["activityID"]
-    workflowID = provenance_data["context"]["workflowID"]
+    activity_id = provenance_data["context"]["activityID"]
+    workflow_id = provenance_data["context"]["workflowID"]
 
     prov_message = message["provenance"]
 
     prov_message["context"] = dict()
-    prov_message["context"]["activityID"] = str(activityID)
-    prov_message["context"]["workflowID"] = str(workflowID)
+    prov_message["context"]["activityID"] = str(activity_id)
+    prov_message["context"]["workflowID"] = str(workflow_id)
     if provenance_data["context"].get('stepID'):
         prov_message["context"]["stepID"] = provenance_data["context"]["stepID"]
     message["payload"] = dict()
