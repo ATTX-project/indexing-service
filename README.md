@@ -10,7 +10,7 @@ VERSION: `0.2`
 Using the Indexing Service Docker container:
 * `docker pull attxproject/index-service:dev` in the current folder;
 * running the container `docker run -d -p 4304:4304 attxproject/index-service:dev` runs the container in detached mode on the `4302` port (production version should have this port hidden);
-* using the endpoints `http://localhost:4302/$versionNb/health` or the other listed below.
+* using the endpoints `http://localhost:4304/$versionNb/health` or the other listed below.
 
 The version number is specified in `src/prov/app.py` under `version` variable.
 
@@ -51,4 +51,4 @@ python src/esindex/indexservice.py server
 python src/esindex/indexservice.py rpc
 ```
 
-For testing purposes the application requires a running Elasticsearch, RabbitMQ. Also the health endpoint provides information on running services the service has detected: `http://localhost:4302/health`
+For testing purposes the application requires a running Elasticsearch, RabbitMQ. Also the health endpoint provides information on running services the service has detected: `http://localhost:4304/health`
