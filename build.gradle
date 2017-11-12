@@ -110,7 +110,7 @@ uploadArchives {
             pom.project {
                 version = "${artifactVersion}"
                 groupId = "${serviceID}"
-                description "Graph Manager Service."
+                description "Indexing Service."
             }
         }
     }
