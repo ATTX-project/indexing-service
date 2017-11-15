@@ -23,7 +23,7 @@ class IndexingAPITestCase(testing.TestCase):
 
 
 class IndexingTestCase(IndexingAPITestCase):
-    """Test for Queue API operations."""
+    """Test for Indexing API operations."""
 
     def test_create(self):
         """Test create message."""
@@ -33,7 +33,7 @@ class IndexingTestCase(IndexingAPITestCase):
     @responses.activate
     @patch.object(ElasticIndex, '_alias_list')
     def test_api_alias_list_get(self, mock):
-        """Test get specific prov id from endpoint."""
+        """Test alias list endpoint."""
         responses.add(responses.GET, "{0}{1}/alias/list".format(self.api, self.version), status=200)
         result = self.simulate_get("/{0}/alias/list".format(self.version))
         self.assertTrue(mock.called)
@@ -49,7 +49,7 @@ class IndexingTestCase(IndexingAPITestCase):
 
     @responses.activate
     def test_api_index_bad(self):
-        """Test prov bad input."""
+        """Test index bad input."""
         with open('tests/resources/request_bad_index.json') as datafile:
             index_message = datafile.read().replace('\n', '')
         hdrs = [('Accept', 'application/json'),
@@ -60,7 +60,7 @@ class IndexingTestCase(IndexingAPITestCase):
     @responses.activate
     @patch('esindex.api.indexing.add_message')
     def test_api_index_post(self, mock):
-        """Test get specific prov id from endpoint."""
+        """Test get Accept from indexing data."""
         hdrs = [('Accept', 'application/json'),
                 ('Content-Type', 'application/json'), ]
         with open('tests/resources/request_index.json') as datafile:
