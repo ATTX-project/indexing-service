@@ -1,0 +1,27 @@
+{
+	  "provenance": {
+	    "context": {
+	      "workflowID": "ingestionwf",
+	      "activityID": 1,
+	      "stepID": "replaceds"
+	    }
+	  },
+      "payload": {
+        "indexingServiceInput": {
+          "sourceData":
+          [
+            {
+              "useBulk": true,
+              "docType": "test",
+              "inputType": "Graph",
+              "input": "file:///attx-sb-shared/bulk_test.json"
+            },
+            {
+              "useBulk": true,
+              "docType": "testing",
+              "inputType": "URI",
+              "input": "file:///attx-sb-shared/bulk_test.json"
+            }
+          ]
+        }
+    } }

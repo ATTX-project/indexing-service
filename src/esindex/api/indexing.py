@@ -28,4 +28,4 @@ class AliasesList(object):
         resp.data = json.dumps(list(elastic._alias_list()), indent=1, sort_keys=True)
         resp.content_type = 'application/json'
         resp.status = falcon.HTTP_200
-        app_logger.info('Finished operations on /aliases/list GET Request.')
+        app_logger.info('Finished operations on /alias/list GET Request.')

@@ -65,6 +65,7 @@ dependencies {
     test 'pypi:pytz:2016.4'
     test 'pypi:mock:2.0.0'
     test 'pypi:httpretty:0.8.14'
+    test 'pypi:responses:0.7.0'
 }
 
 // Succesfully running the tests requires a logs folder existing.
