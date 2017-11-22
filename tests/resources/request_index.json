@@ -14,14 +14,14 @@
             {
               "useBulk": true,
               "docType": "test",
-              "inputType": "URI",
-              "input": "file:///attx-sb-shared/bulk_test.json"
+              "inputType": "Data",
+              "input": "{ \"index\" : { \"_id\" : \"1\" } }\r\n{ \"field1\" : \"value1\" }\r\n{ \"delete\" : { \"_id\" : \"2\" } }\r\n{ \"create\" : { \"_id\" : \"3\" } }\r\n{ \"field1\" : \"value3\" }\r\n{ \"update\" : {\"_id\" : \"1\"} }\r\n{ \"doc\" : {\"field2\" : \"value2\"} }"
             },
             {
               "useBulk": true,
               "docType": "testing",
-              "inputType": "URI",
-              "input": "file:///attx-sb-shared/bulk_test.json"
+              "inputType": "Data",
+              "input": "{ \"index\" : { \"_id\" : \"1\" } }\r\n{ \"field1\" : \"value1\" }\r\n{ \"delete\" : { \"_id\" : \"2\" } }\r\n{ \"create\" : { \"_id\" : \"3\" } }\r\n{ \"field1\" : \"value3\" }\r\n{ \"update\" : {\"_id\" : \"1\"} }\r\n{ \"doc\" : {\"field2\" : \"value2\"} }"
             }
           ]
         }
