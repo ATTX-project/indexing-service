@@ -9,7 +9,7 @@ from esindex.applib.elastic_index import ElasticIndex
 
 
 class IndexingAPITestCase(testing.TestCase):
-    """Testing Queues task."""
+    """Testing Indexing API."""
 
     def setUp(self):
         """Setting the app up."""

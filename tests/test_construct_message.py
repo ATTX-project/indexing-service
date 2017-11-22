@@ -6,8 +6,8 @@ from esindex.applib.elastic_index import ElasticIndex
 from amqpstorm import AMQPConnectionError
 
 
-class ConstructFrameTestCase(unittest.TestCase):
-    """Test for constuct message frame function."""
+class ConstructIndexTestCase(unittest.TestCase):
+    """Test for constuct index message function."""
 
     def setUp(self):
         """Set up test fixtures."""
