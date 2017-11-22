@@ -52,14 +52,14 @@ class TestIndex(appHealthTest):
         assert(result.content == response)
         httpretty.disable()
         httpretty.reset()
-
-    @patch('esindex.api.healthcheck.healthcheck_response')
-    def test_actual_health_response(self, mock):
-        """Test if json response format."""
-        mock.return_value = {"indexService": "Running", "messageBroker": "Not Running", "elasticsearch": "Not Running"}
-        response = healthcheck_response("Running")
-        json_response = {"indexService": "Running", "messageBroker": "Not Running", "elasticsearch": "Not Running"}
-        assert(json_response == json.loads(response))
+    # 
+    # @patch('esindex.api.healthcheck.healthcheck_response')
+    # def test_actual_health_response(self, mock):
+    #     """Test if json response format."""
+    #     mock.return_value = {"indexService": "Running", "messageBroker": "Not Running", "elasticsearch": "Not Running"}
+    #     response = healthcheck_response("Running")
+    #     json_response = {"indexService": "Running", "messageBroker": "Not Running", "elasticsearch": "Not Running"}
+    #     assert(json_response == json.loads(response))
 
 
 if __name__ == "__main__":
