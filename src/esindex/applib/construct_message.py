@@ -9,8 +9,9 @@ from requests_file import FileAdapter
 from esindex.applib.elastic_index import ElasticIndex
 from functools import wraps
 
-artifact_id = 'IndexingService'  # Define the IndexingService agent
-agent_role = 'index'  # Define Agent type
+artifact_id = "IndexingService"  # Define the IndexingService agent
+agent_role = "index"  # Define Agent type
+output_key = "indexingServiceOutput"
 
 
 def index_data(func):
@@ -55,7 +56,7 @@ def replace_message(message_data, replace_index, alias_list):
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
         app_logger.info('Replaced Indexed data with: {0} aliases'.format(alias_list))
-        return json.dumps(response_message(message_data["provenance"], "success"), indent=4, separators=(',', ': '))
+        return json.dumps(response_message(message_data["provenance"], status="success"), indent=4, separators=(',', ': '))
     except Exception as error:
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         PUBLISHER.push(prov_message(message_data, "error", startTime, endTime, replace_index))
@@ -74,7 +75,7 @@ def add_message(message_data, replace_index, alias_list):
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
         app_logger.info('Indexed data with: {0} aliases'.format(alias_list))
-        return json.dumps(response_message(message_data["provenance"], "success"), indent=4, separators=(',', ': '))
+        return json.dumps(response_message(message_data["provenance"], status="success"), indent=4, separators=(',', ': '))
     except Exception as error:
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
         PUBLISHER.push(prov_message(message_data, "error", startTime, endTime, replace_index))
@@ -181,8 +182,8 @@ def prov_message(message_data, status, start_time, end_time, replace_index):
     return json.dumps(message)
 
 
-def response_message(provenance_data, output):
-    """Construct Indexing Service response."""
+def response_message(provenance_data, status, status_messsage=None, output=None):
+    """Construct Graph Manager response."""
     message = dict()
     message["provenance"] = dict()
     message["provenance"]["agent"] = dict()
@@ -200,5 +201,9 @@ def response_message(provenance_data, output):
     if provenance_data["context"].get('stepID'):
         prov_message["context"]["stepID"] = provenance_data["context"]["stepID"]
     message["payload"] = dict()
-    message["payload"]["indexingServiceOutput"] = output
+    message["payload"]["status"] = status
+    if status_messsage:
+        message["payload"]["statusMessage"] = status_messsage
+    if output:
+        message["payload"][output_key] = output
     return message

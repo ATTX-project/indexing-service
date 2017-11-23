@@ -6,6 +6,7 @@ from amqpstorm import Message
 from amqpstorm import Connection
 from esindex.utils.logs import app_logger
 from esindex.applib.construct_message import replace_message, add_message
+from esindex.applib.construct_message import response_message
 
 
 class ScalableRpcServer(object):
@@ -182,10 +183,10 @@ class Consumer(object):
         if self.channel:
             self.channel.close()
 
-    def handle_message(self, message):
+    def _handle_message(self, message):
         """Handle ES index messages."""
         message_data = json.loads(message.body)
-        action = message_data["payload"]["indexingServiceInput"]["activity"]
+        action = message_data["payload"]["indexingServiceInput"]["task"]
         if action == "replace":
             return str(replace_message(message_data))
         elif action == "add":
@@ -200,15 +201,15 @@ class Consumer(object):
         :return:
         """
         try:
-            processed_message = self.handle_message(message)
+            processed_message = self._handle_message(message)
         except Exception as e:
             app_logger.error('Something went wrong: {0}'.format(e))
             properties = {
                 'correlation_id': message.correlation_id
             }
             error_message = "Error Type: {0}, with message: {1}".format(e.__class__.__name__, e.message)
-            processed_message = {"status": "Error",
-                                 "statusMessage": error_message}
+            message_data = json.loads(message.body)
+            processed_message = response_message(message_data["provenance"], status="error", status_messsage=error_message)
             response = Message.create(message.channel, str(json.dumps(processed_message, indent=4, separators=(',', ': '))), properties)
             response.publish(message.reply_to)
             message.reject(requeue=False)
