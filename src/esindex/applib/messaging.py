@@ -192,7 +192,7 @@ class Consumer(object):
         elif action == "add":
             return str(add_message(message_data))
         else:
-            raise KeyError("Missing action or activity not specified.")
+            raise KeyError("Missing action or task not specified.")
 
     def __call__(self, message):
         """Process the RPC Payload.
