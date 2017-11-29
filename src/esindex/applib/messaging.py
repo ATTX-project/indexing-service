@@ -10,7 +10,7 @@ from esindex.applib.construct_message import response_message
 
 
 class ScalableRpcServer(object):
-    """Graph Manger RPC server."""
+    """Indexing RPC server."""
 
     def __init__(self, hostname='127.0.0.1',
                  username='guest', password='guest',

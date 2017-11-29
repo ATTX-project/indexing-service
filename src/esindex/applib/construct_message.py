@@ -54,7 +54,8 @@ def replace_message(message_data, replace_index, alias_list):
         # This is what makes it a replace operation.
         elastic._replace_index(replace_index, alias_list)
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
+        if bool(message_data["provenance"]):
+            PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
         app_logger.info('Replaced Indexed data with: {0} aliases'.format(alias_list))
         return json.dumps(response_message(message_data["provenance"], status="success"), indent=4, separators=(',', ': '))
     except Exception as error:
@@ -73,7 +74,8 @@ def add_message(message_data, replace_index, alias_list):
     try:
         elastic._add_alias(replace_index, alias_list)
         endTime = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-        PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
+        if bool(message_data["provenance"]):
+            PUBLISHER.push(prov_message(message_data, "success", startTime, endTime, replace_index))
         app_logger.info('Indexed data with: {0} aliases'.format(alias_list))
         return json.dumps(response_message(message_data["provenance"], status="success"), indent=4, separators=(',', ': '))
     except Exception as error:
@@ -186,20 +188,22 @@ def response_message(provenance_data, status, status_messsage=None, output=None)
     """Construct Graph Manager response."""
     message = dict()
     message["provenance"] = dict()
-    message["provenance"]["agent"] = dict()
-    message["provenance"]["agent"]["ID"] = artifact_id
-    message["provenance"]["agent"]["role"] = agent_role
 
-    activity_id = provenance_data["context"]["activityID"]
-    workflow_id = provenance_data["context"]["workflowID"]
+    if bool(provenance_data):
+        message["provenance"]["agent"] = dict()
+        message["provenance"]["agent"]["ID"] = artifact_id
+        message["provenance"]["agent"]["role"] = agent_role
 
-    prov_message = message["provenance"]
+        activity_id = provenance_data["context"]["activityID"]
+        workflow_id = provenance_data["context"]["workflowID"]
 
-    prov_message["context"] = dict()
-    prov_message["context"]["activityID"] = str(activity_id)
-    prov_message["context"]["workflowID"] = str(workflow_id)
-    if provenance_data["context"].get('stepID'):
-        prov_message["context"]["stepID"] = provenance_data["context"]["stepID"]
+        prov_message = message["provenance"]
+
+        prov_message["context"] = dict()
+        prov_message["context"]["activityID"] = str(activity_id)
+        prov_message["context"]["workflowID"] = str(workflow_id)
+        if provenance_data["context"].get('stepID'):
+            prov_message["context"]["stepID"] = provenance_data["context"]["stepID"]
     message["payload"] = dict()
     message["payload"]["status"] = status
     if status_messsage:

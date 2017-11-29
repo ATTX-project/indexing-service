@@ -7,16 +7,9 @@
   "properties": {
     "provenance": {
       "type": "object",
-      "required": [
-        "context"
-      ],
       "properties": {
         "context": {
           "type": "object",
-          "required": [
-            "workflowID",
-            "activityID"
-          ],
           "properties": {
             "workflowID": {
               "type": "string"
