@@ -44,7 +44,7 @@ class ElasticIndex(object):
         """Create a new index if it does not exist."""
         try:
             if target_index is not None and not(self.es.indices.exists(target_index)):
-                self.es.indices.create(index=target_index, ignore=400)
+                self.es.indices.create(index=target_index, ignore=400, refresh=True)
             else:
                 target_index = "{0}_service_{1}".format(reference_alias, datetime.now().strftime('%Y%m%d_%H%M%S'))
             app_logger.info("New index created: \"{0}\".".format(target_index))
@@ -56,7 +56,7 @@ class ElasticIndex(object):
 
     def _index_delete(self, target_index):
         """Delete an index and remove it aliases."""
-        if self.es.indices.exists(target_index):
+        if self.es.indices.exists(target_index, refresh=True):
             self.es.indices.delete(index=target_index, ignore=[400, 404])
         app_logger.info("Index deleted: \"{0}\".".format(target_index))
 
@@ -65,7 +65,7 @@ class ElasticIndex(object):
         try:
             if doc_type is None:
                 doc_type = "General"
-            self.es.bulk(index=target_index, doc_type=doc_type, body=data)
+            self.es.bulk(index=target_index, doc_type=doc_type, body=data, refresh=True)
             app_logger.info("Bulk Index in Elasticsearch at index: \"{0}\" with type: \"{1}\".".format(target_index, doc_type))
         except Exception as error:
             app_logger.error('Something is wrong: {0}'.format(error))
@@ -76,7 +76,7 @@ class ElasticIndex(object):
         try:
             if doc_type is None:
                 doc_type = "General"
-            self.es.index(index=target_index, id=doc_id, doc_type=doc_type, body=data)
+            self.es.index(index=target_index, id=doc_id, doc_type=doc_type, body=data, refresh=True)
             app_logger.info("Index document {0} in Elasticsearch at index: \"{1}\" with type: \"{2}\".".format(doc_id, target_index, doc_type))
         except Exception as error:
             app_logger.error('Something is wrong: {0}'.format(error))

@@ -146,39 +146,28 @@ def prov_message(message_data, status, start_time, end_time, replace_index):
     message["provenance"]["input"] = []
     message["provenance"]["output"] = []
     message["payload"] = {}
-    if type(replace_index) is list:
-        for index in replace_index:
-            output_data = {
-                "index": index,
-                "key": "outputIndex",
-                "role": "Dataset"
-            }
-            message["provenance"]["output"].append(output_data)
-    else:
-        output_data = {
-            "index": str(replace_index),
-            "key": "outputIndex",
-            "role": "Dataset"
-        }
-        message["provenance"]["output"].append(output_data)
 
     alias_list = [str(r) for r in message_data["payload"]["indexingServiceInput"]["targetAlias"]]
-    source_data = message_data["payload"]["indexingServiceInput"]["sourceData"]
-
-    for elem in source_data:
-        key = "index_{0}".format(source_data.index(elem))
-        input_data = {
-            "aliases": alias_list,
+    for alias in alias_list:
+        key = "outputAlias_{0}".format(alias_list.index(alias))
+        output_data = {
             "key": key,
-            "role": "alias"
+            "role": "PublishedDataset"
+        }
+        message["provenance"]["output"].append(output_data)
+        message["payload"][key] = alias
+    source_data = message_data["payload"]["indexingServiceInput"]["sourceData"]
+    for elem in source_data:
+        key = "inputData_{0}".format(source_data.index(elem))
+        input_data = {
+            "key": key,
+            "role": "Dataset"
         }
         if elem["inputType"] == "Data":
             message["payload"][key] = "attx:tempDataset"
         if elem["inputType"] == "URI":
             message["payload"][key] = elem["input"]
         message["provenance"]["input"].append(input_data)
-    message["payload"]["aliases"] = message_data["payload"]["indexingServiceInput"]["targetAlias"]
-    message["payload"]["outputIndex"] = replace_index
 
     app_logger.info('Construct provenance metadata for Indexing Service.')
     return json.dumps(message)
