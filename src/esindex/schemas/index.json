@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "required": [
+    "provenance",
+    "payload"
+  ],
+  "properties": {
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "context": {
+          "type": "object",
+          "properties": {
+            "workflowID": {
+              "type": "string"
+            },
+            "activityID": {
+              "type": "integer"
+            },
+            "stepID": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "required": [
+        "indexingServiceInput"
+      ],
+      "properties": {
+        "indexingServiceInput": {
+          "type": "object",
+          "required": [
+            "targetAlias",
+            "sourceData"
+          ],
+          "properties": {
+            "targetAlias": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "sourceData": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "inputType",
+                  "input"
+                ],
+                "properties": {
+                  "useBulk": {
+                    "type": "boolean"
+                  },
+                  "docType": {
+                    "type": "string"
+                  },
+                  "inputType": {
+                    "type": "string"
+                  },
+                  "input": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
