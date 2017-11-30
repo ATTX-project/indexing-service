@@ -174,7 +174,7 @@ def prov_message(message_data, status, start_time, end_time, replace_index):
 
 
 def response_message(provenance_data, status, status_messsage=None, output=None):
-    """Construct Graph Manager response."""
+    """Construct Index Service response."""
     message = dict()
     message["provenance"] = dict()
 
