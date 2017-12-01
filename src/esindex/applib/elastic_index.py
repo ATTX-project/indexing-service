@@ -54,10 +54,11 @@ class ElasticIndex(object):
         finally:
             return target_index
 
-    def _index_delete(self, target_index):
+    def _index_delete(self, index_list):
         """Delete an index and remove it aliases."""
-        if self.es.indices.exists(target_index, refresh=True):
-            self.es.indices.delete(index=target_index, ignore=[400, 404])
+        for target_index in index_list:
+            if self.es.indices.exists(target_index):
+                self.es.indices.delete(index=target_index, ignore=[400, 404])
         app_logger.info("Index deleted: \"{0}\".".format(target_index))
 
     def _bulk_index(self, doc_type, data, target_index):
@@ -96,8 +97,8 @@ class ElasticIndex(object):
                 update["actions"].append({"add": {"index": new_index, "alias": alias}})
                 for elem in old_index:
                     update["actions"].append({"remove": {"index": elem, "alias": alias}})
-                    self._index_delete(elem)
             self.es.indices.update_aliases(body=json.dumps(update))
+            self._index_delete(old_index)
             app_logger.info("Replace index finished.")
         except Exception as error:
             app_logger.error('Something is wrong: {0}'.format(error))
@@ -106,7 +107,7 @@ class ElasticIndex(object):
             return json.dumps(update)
 
     def _add_alias(self, new_index, alias_list):
-        """Replace an existing index based on an alias."""
+        """Add index based on an alias."""
         update = dict([('actions', [])])
         try:
             for alias in alias_list:
