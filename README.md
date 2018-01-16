@@ -9,7 +9,7 @@ VERSION: `0.2`
 
 Using the Indexing Service Docker container:
 * `docker pull attxproject/index-service:dev` in the current folder;
-* running the container `docker run -d -p 4304:4304 attxproject/index-service:dev` runs the container in detached mode on the `4302` port (production version should have this port hidden);
+* running the container `docker run -d -p 4304:4304 attxproject/index-service:dev` runs the container in detached mode on the `4304` port (production version should have this port hidden);
 * using the endpoints `http://localhost:4304/{versionNb}/{endpoint}` or the other listed below.
 
 The version number is specified in `src/esindex/app.py` under `version` variable.
