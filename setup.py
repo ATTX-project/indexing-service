@@ -156,9 +156,9 @@ setup(
         '': ['*.json']
     },
     include_package_data=True,
-    name='falcon-pygradle',
+    name='indexing-service',
     # version='1.0.0',  # This is not read instead Gradle build version is used
-    description='Falcon PyGradle example',
+    description='ATTX Indexing Service',
     entry_points='''
         [console_scripts]
         indexapi=esindex.indexservice:main
@@ -166,7 +166,7 @@ setup(
     author='ATTX Project',
     author_email='stefan.negru@helsinki.fi',
     url='https://www.helsinki.fi/en/projects/attx-2016',
-    long_description="PyGradle example for creating a Falcon REST API.",
+    long_description="ATTX Indexing Service for Elasticsearch 5+.",
     license='Apache Software License',
     platforms='Linux',
     classifiers=[
